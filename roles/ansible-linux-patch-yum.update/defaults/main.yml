@@ -1,0 +1,5 @@
+---
+# defaults file for patch-automation
+local_dir: "/tmp/ansible/sys-patching"
+
+patching_type: SYSTEM_PATCHING

@@ -1,0 +1,61 @@
+---
+    - name: create file with hostname
+      shell: hostname > ~/removeme.txt
+
+    - name: replace FQDN with Nickname
+      shell: sed -i 's+.aetnat.com++g' ~/removeme.txt
+
+    - name: echo removeme.txt
+      command: cat ~/removeme.txt
+      register: hostname
+
+    - set_fact:
+       vmlist: "{{ hostname.stdout }}"
+
+    - name: debug host nickname
+      debug: msg="{{ hostname.stdout }}"
+
+    - name: download pip
+      get_url:
+        url: "{{ pip_download_url }}"
+        dest: "{{ pip_dest }}"
+
+    - name: install pip
+      command: python "{{ pip_path }}"
+
+    - name: install pyVmomi
+      command: pip install pyVmomi
+
+    - set_fact: creationdate="{{lookup('pipe','date "+%Y/%m/%d %H:%M"')}}"
+
+
+    - set_fact: role_action="{{ desired_role_action | default('Create') }}"
+
+
+    - name: "{{ role_action }} a virtual machine snapshot"
+      vmware_guest_snapshot:
+        validate_certs: False
+        hostname: "{{ vcenter_host }}"
+        username: "{{ vcenter_user }}"
+        password: "{{ vcenter_pass }}"
+        datacenter: "{{ vcenter_datacenter }}"
+        name: "{{ vmlist }}"
+        folder: "{{ vcenter_folder }}"
+        state: "{{ snapshot_state | default('present') }}"
+        snapshot_name: "{{ snapshot_name }}"
+        description: "{{ snapshot_description }} {{ creationdate }}"
+      register: vmsnap
+
+
+    - name: debug guest
+      debug: var=vmsnap
+
+    - name: delete hostname file
+      file:
+        path: "{{ hostname_dest }}"
+        state: absent
+
+    - name: delete downloaded pip.py file
+      file:
+        path: "{{ pip_path }}"
+        state: absent

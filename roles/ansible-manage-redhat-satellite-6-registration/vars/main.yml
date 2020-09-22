@@ -1,0 +1,10 @@
+---
+satellite_fqdn: xlab2358.aetnat.com
+download_method: http
+org: Default_Organization
+location: Default Location
+A_key: rhel7_demo_key
+hostgroup: AP_Test_Hosts
+env: "Dev"
+admin_user: Andy
+admin_pass: "{{ vault_admin_pass }}"

@@ -1,0 +1,27 @@
+---
+   - name: Check available diskspace on /tmp partition
+     shell: df  /tmp --output\=avail | tail -1
+     register: tmp_freespace
+
+   - shell: echo "{{ inventory_hostname }}"
+     register: op
+
+   - debug:
+       msg:
+         - "{{ tmp_freespace.stdout }}"
+         - "{{ op.stdout }}"
+
+   - mail:
+       subject: 'DISK USAGE ALERT !!!'
+       from: 'OnyekachiA@aetna.com'
+       body: "/tmp  HAS REACHED {{ tmp_freespace.stdout }}  ON {{ op.stdout }}, and does not have the minimum space required to continue (2Gb requested). KINDLY CHECK !!!"
+       to: 'OnyekachiA@aetna.com'
+       charset: utf8
+     tags: mail
+     when: tmp_freespace.stdout|float is lt 2000000
+
+   - name: fail when diskspace threshold is reached
+     fail:
+       msg: /tmp does not have the minimum space required to continue (2Gb requested).
+     when: tmp_freespace.stdout|float is lt 2000000
+

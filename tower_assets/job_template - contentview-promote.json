@@ -1,0 +1,114 @@
+{
+    "allow_simultaneous": true, 
+    "asset_relation": {
+        "extra_credentials": [], 
+        "labels": [], 
+        "notification_templates_error": [], 
+        "notification_templates_success": [], 
+        "roles": [
+            {
+                "name": "Admin", 
+                "team": [
+                    "SADT-Lin"
+                ], 
+                "user": [
+                    "n444646"
+                ]
+            }, 
+            {
+                "name": "Execute", 
+                "team": [], 
+                "user": []
+            }, 
+            {
+                "name": "Read", 
+                "team": [], 
+                "user": []
+            }
+        ], 
+        "schedules": [], 
+        "survey_spec": {
+            "description": "", 
+            "name": "", 
+            "spec": [
+                {
+                    "choices": "", 
+                    "default": "miguel", 
+                    "max": 1024, 
+                    "min": 0, 
+                    "new_question": true, 
+                    "question_description": "Satellite admin user", 
+                    "question_name": "Satellite User", 
+                    "required": true, 
+                    "type": "text", 
+                    "variable": "satellite_user"
+                }, 
+                {
+                    "choices": "", 
+                    "default": "", 
+                    "max": 32, 
+                    "min": 0, 
+                    "new_question": true, 
+                    "question_description": "Sat admin password", 
+                    "question_name": "Satellite password", 
+                    "required": true, 
+                    "type": "password", 
+                    "variable": "satellite_pw"
+                }, 
+                {
+                    "choices": "", 
+                    "default": "xlab2358.aetnat.com", 
+                    "max": 1024, 
+                    "min": 0, 
+                    "new_question": true, 
+                    "question_description": "", 
+                    "question_name": "Satellite Server", 
+                    "required": true, 
+                    "type": "text", 
+                    "variable": "satelliteurl"
+                }, 
+                {
+                    "choices": "", 
+                    "default": "cv23lab", 
+                    "max": 1024, 
+                    "min": 0, 
+                    "question_description": "content view to update", 
+                    "question_name": "Content view name", 
+                    "required": true, 
+                    "type": "text", 
+                    "variable": "cv_name"
+                }, 
+                {
+                    "choices": "", 
+                    "default": "patchcheckout", 
+                    "max": 1024, 
+                    "min": 0, 
+                    "question_description": "name of lifecycle environment to push cv to", 
+                    "question_name": "Lifecycle environment", 
+                    "required": true, 
+                    "type": "text", 
+                    "variable": "le_name"
+                }, 
+                {
+                    "choices": "", 
+                    "default": "", 
+                    "max": 1024, 
+                    "min": 0, 
+                    "question_description": "cv version to push to lifecycle environment", 
+                    "question_name": "Contentview version", 
+                    "required": true, 
+                    "type": "text", 
+                    "variable": "cv_version"
+                }
+            ]
+        }
+    }, 
+    "asset_type": "job_template", 
+    "credential": "IaC/ansible-common/Tower Credentials", 
+    "inventory": "IaC/ansible-common/localhost", 
+    "name": "SrvAutoDevTool/ansible-red-hat-satellite-patch-sandbox/contentview-promote", 
+    "playbook": "cv_promote2lfe.yml", 
+    "project": "SrvAutoDevTool/ansible-red-hat-satellite-patch-sandbox", 
+    "survey_enabled": true, 
+    "use_fact_cache": true
+}

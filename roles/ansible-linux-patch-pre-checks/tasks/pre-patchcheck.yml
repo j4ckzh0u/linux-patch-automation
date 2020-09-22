@@ -1,0 +1,90 @@
+---
+#################################################################################
+## Pre-update Check                                                             #
+## ##############################################################################
+
+# Supported OS:  RHEL
+- name: "set patching time"
+  set_fact:
+    timestamp: "{{ ansible_date_time.iso8601_basic_short }}"
+  delegate_to: localhost
+#  run_once: true
+
+
+# Check system pre_update uptime
+- name: Checking uptime before system reboot
+  shell: uptime
+  register: UPTIME_PRE_REBOOT
+
+- debug: msg={{UPTIME_PRE_REBOOT.stdout}}
+
+
+# Check if the system is not RH
+- block:
+  - name: "Check if not a RHEL server"
+    lineinfile:
+      line: "HOSTNAME: {{ inventory_hostname }} | Not a RHEL server"
+      dest: "{{ local_dir }}/update.{{ inventory_hostname }}.FAILED.{{ timestamp }}"
+      create: yes
+    when: ansible_distribution not in supported_distros
+    delegate_to: localhost
+
+  - name: "Fail host if it is not RHEL"
+    fail:
+      msg: "HOSTNAME: {{ inventory_hostname }} | Not a RHEL server"
+    when: ansible_distribution not in supported_distros
+
+
+# Collect the system distribution and version
+- name: set pre update os_info
+  set_fact:
+    os_info_pre_update:
+      distribution: "{{ ansible_distribution }}"
+      distribution_major_version: "{{ ansible_distribution_major_version }}"
+      distribution_release: "{{ ansible_distribution_release }}"
+      distribution_version: "{{ ansible_distribution_version }}"
+
+- name: "current OS version information before the update"
+  blockinfile:
+    block:  |
+      "HOSTNAME: {{ inventory_hostname }} version before the update:"
+      "      distribution: {{ os_info_pre_update.distribution  }} "
+      "      distribution_major_version: {{ os_info_pre_update.distribution_major_version }}"
+      "      distribution_release: {{ os_info_pre_update.distribution_release }}"
+      "      distribution_version: {{ os_info_pre_update.distribution_version }}"
+    dest: "{{ local_dir }}/update.{{ inventory_hostname }}.OK.{{ timestamp }}"
+    create: yes
+    marker: " "
+  delegate_to: localhost
+
+#################################################################################################
+- name: "Return service state information"
+  service_facts:
+
+- name: " Collect a list of the mounted device "
+  set_fact:
+    dvs: "{{ ansible_mounts | map(attribute='device') | list }}"
+
+
+- name: "Register all the system interface "
+  debug:
+    msg: "{{ item }}"
+  loop: "{{ ansible_interfaces }}"
+  when:
+    - hostvars[inventory_hostname]['ansible_%s' | format(item)]['ipv4'] is defined
+    - hostvars[inventory_hostname]['ansible_%s' | format(item)]['active'] == true
+    - hostvars[inventory_hostname]['ansible_%s' | format(item)]['device'] != 'lo'
+  register: NIC_interface
+
+- name: "get the IP address for each interface"
+  debug:
+    msg: "{{ hostvars[inventory_hostname]['ansible_%s' | format(item.item)]['ipv4']['address'] }}"
+  loop: "{{ NIC_interface['results'] }}"
+  when: item.skip_reason is not defined
+  register: NIC_IP
+
+
+- name: " Check SELinux Status before the patching "
+  set_fact:
+    selinux_status: "{{ ansible_selinux['status'] }}"
+

@@ -1,0 +1,29 @@
+---
+# vars file for patch-automation
+yum_name: "*"
+yum_state: latest
+yum_enablerepo: "rhel-?-server-rpms,rhel-?-server-satellite-tools-6.?-rpms"
+yum_disablerepo: "*"
+yum_exclude: ""
+debug_enabled_default: false
+update_default: true
+reboot_default: true
+server_update_reboot_connect_timeout: 5
+server_update_reboot_pre_reboot_delay: 30
+server_update_reboot_post_reboot_delay: 100
+server_update_reboot_reboot_timeout: 600
+server_update_yum_install_pkgs: '*'
+server_update_yum_exclude_pkgs: []
+vastool_status: "vas_status.stdout.split('\n')[4].split(':')"
+vastool_path: "/opt/quest/bin/vastool"
+servicename: vastool
+supported_distros:
+  - RedHat
+  - CentOS
+
+ip_address: "{{ ansible_default_ipv4.address }}"
+patching_type: SYSTEM_PATCHING
+local_dir: "/tmp/ansible/sys-patching"
+# For Redhat/CentOS: List of packages to ONLY update (comma separated).
+# For Redhat/CentOS: List of packages to not update (comma separated).
+# server_update_yum_exclude_pkgs: "mysql*, bash, openssh*"

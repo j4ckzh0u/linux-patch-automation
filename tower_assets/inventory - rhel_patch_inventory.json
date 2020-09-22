@@ -1,0 +1,56 @@
+{
+    "asset_relation": {
+        "group": [
+            {
+                "hosts": [
+                    "xlab2359.aetnat.com",
+                    "xlab2360.aetnat.com"
+                ], 
+                "name": "patch_all", 
+                "sub_groups": []
+            }
+        ], 
+        "host": [
+            {
+                "name": "xlab2359.aetnat.com"
+            },
+            {
+                "name": "xlab2360.aetnat.com"
+            }
+        ], 
+        "inventory_source": [], 
+        "roles": [
+            {
+                "name": "Update", 
+                "team": [], 
+                "user": []
+            }, 
+            {
+                "name": "Use", 
+                "team": [], 
+                "user": []
+            }, 
+            {
+                "name": "Read", 
+                "team": [], 
+                "user": []
+            }, 
+            {
+                "name": "Admin", 
+                "team": [
+                    "SADT-Lin"
+                ], 
+                "user": []
+            }, 
+            {
+                "name": "Ad Hoc", 
+                "team": [], 
+                "user": []
+            }
+        ]
+    }, 
+    "asset_type": "inventory", 
+    "name": "SrvAutoDevTool/ansible-red-hat-satellite-patch-sandbox/rhel_patch_inventory", 
+    "organization": "Aetna", 
+    "variables": "---"
+}

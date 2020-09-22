@@ -1,0 +1,11 @@
+---
+- hosts: test
+  become: yes
+  remote_user: toweragent
+  gather_facts: False
+  vars_files:
+    - ../../../roles/manage-redhat-satellite-6-registration/vars/vault.yml
+    - ../../../roles/manage-redhat-satellite-6-registration/vars/vars.yml
+
+  roles:
+    - ../../../roles/manage-redhat-satellite-6-registration

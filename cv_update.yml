@@ -1,0 +1,28 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: gather satellite facts
+      include_role:
+        name: gather-redhat-satellite-cv-facts
+
+    - name: "get rule info"
+      include_role:
+        name: gather-redhat-satellite-rule-facts
+
+    - name: "update filter"
+      include_role:
+        name: contentview-errata-filter-update
+
+    - name: "get version info for publish"
+      include_role:
+        name: get-redhat-satellite-cv-version
+
+    - name: "publish new cv version with filter"
+      include_role:
+        name: satellite-contentview-publish
+      async: 360
+      poll: 0
+...

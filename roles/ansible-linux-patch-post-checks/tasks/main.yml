@@ -1,0 +1,16 @@
+---
+# tasks file for patch-automation
+# import tasks file to initiate the patching
+- name: Defining patching Type
+  debug:
+    msg: "patching_type: {{ patching_type }}"
+
+#- include_role: ansible-linux-patch-post-checks
+#- name: Importing system reboot
+#  include_tasks: reboot.yml
+#  when: patching_type == "SYSTEM_PATCHING"
+
+- name: Importing post patch checks
+  include_tasks: post-patchcheck.yml
+  when: patching_type == "SYSTEM_PATCHING"
+

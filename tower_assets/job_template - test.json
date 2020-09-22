@@ -1,0 +1,56 @@
+{
+    "allow_simultaneous": true, 
+    "asset_relation": {
+        "extra_credentials": [], 
+        "labels": [], 
+        "notification_templates_error": [], 
+        "notification_templates_success": [], 
+        "roles": [
+            {
+                "name": "Admin", 
+                "team": [
+                    "SADT-Lin"
+                ],
+                "user": [
+                    "a617120"
+                ]
+            }, 
+            {
+                "name": "Execute", 
+                "team": [], 
+                "user": []
+            }, 
+            {
+                "name": "Read", 
+                "team": [], 
+                "user": []
+            }
+        ], 
+        "schedules": [], 
+        "survey_spec": {
+            "description": "", 
+            "name": "", 
+            "spec": [
+                {
+                    "choices": "", 
+                    "default": "jack", 
+                    "max": 1024, 
+                    "min": 0, 
+                    "new_question": true, 
+                    "question_description": "", 
+                    "question_name": "My Name", 
+                    "required": true, 
+                    "type": "text", 
+                    "variable": "my_name"
+                }
+            ]
+        }
+    }, 
+    "asset_type": "job_template", 
+    "credential": "IaC/ansible-common/Tower Credentials", 
+    "inventory": "IaC/ansible-common/localhost", 
+    "name": "SrvAutoDevTool/ansible-red-hat-satellite-patch-sandbox/test", 
+    "playbook": "test.yml", 
+    "project": "SrvAutoDevTool/ansible-red-hat-satellite-patch-sandbox", 
+    "survey_enabled": true
+}

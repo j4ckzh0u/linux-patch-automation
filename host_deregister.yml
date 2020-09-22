@@ -1,0 +1,13 @@
+---
+- name: "deregister host systems from satellite server using ansible-manage-redhat-satellite-6-registration roles"
+  hosts: patch_all
+  remote_user: toweragent
+  become: yes
+  gather_facts: False
+  vars_files:
+#    - ./roles/ansible-manage-redhat-satellite-6-deregistration/vars/vault.yml
+    - ./roles/ansible-manage-redhat-satellite-6-deregistration/vars/vars.yml
+  roles:
+    - ansible-manage-redhat-satellite-6-deregistration
+
+

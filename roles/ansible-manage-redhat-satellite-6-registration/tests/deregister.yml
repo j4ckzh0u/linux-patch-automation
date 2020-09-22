@@ -1,0 +1,17 @@
+---
+- hosts: test
+  remote_user: toweragent
+  become: yes
+  #environment:
+#    ANSIBLE_ROLES_PATH: '/users/n444645/git-new/roles'
+  tasks:
+    - name: Include manage-redhat-satellite-6-registration role
+      include_role:
+        name: manage-redhat-satellite-6-registration
+      vars:
+        desired_role_action: Deregister
+        host_state: absent
+        pkg_state: absent
+        ca_state: absent
+        service_state: no
+        katello_state: stopped

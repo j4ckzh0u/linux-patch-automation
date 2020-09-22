@@ -1,0 +1,37 @@
+{
+    "allow_simultaneous": true, 
+    "asset_relation": {
+        "extra_credentials": [], 
+        "labels": [], 
+        "notification_templates_error": [], 
+        "notification_templates_success": [], 
+        "roles": [
+            {
+                "name": "Admin", 
+                "team": [], 
+                "user": [
+                    "n444645"
+                ]
+            }, 
+            {
+                "name": "Execute", 
+                "team": [], 
+                "user": []
+            }, 
+            {
+                "name": "Read", 
+                "team": [], 
+                "user": []
+            }
+        ], 
+        "schedules": [], 
+        "survey_spec": {}
+    }, 
+    "asset_type": "job_template", 
+    "become_enabled": true, 
+    "credential": "SrvAutoDevTool/ansible-red-hat-satellite-patch-sandbox/DevTowerAgentKey", 
+    "inventory": "SrvAutoDevTool/ansible-red-hat-satellite-patch-sandbox/rhel_patch_inventory", 
+    "name": "SrvAutoDevTool/ansible-red-hat-satellite-patch-sandbox/patch-post-checks", 
+    "playbook": "patch_post_checks.yml", 
+    "project": "SrvAutoDevTool/ansible-red-hat-satellite-patch-sandbox"
+}

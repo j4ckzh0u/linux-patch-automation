@@ -1,0 +1,12 @@
+---
+# tasks file for patch-automation
+# import tasks file to initiate the patching
+- name: Defining patching Type
+  debug:
+    msg: "patching_type: {{ patching_type }}"
+
+#- include_role: ansible-linux-patch-pre-checks
+
+- name: Importing yum update
+  include_tasks: yum.update.yml
+  when: patching_type == "SYSTEM_PATCHING"

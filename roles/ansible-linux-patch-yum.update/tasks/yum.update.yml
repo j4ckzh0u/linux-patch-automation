@@ -1,0 +1,70 @@
+---
+# Supported OS:  RHEL
+- name: "set patching time"
+  set_fact:
+    timestamp: "{{ ansible_date_time.iso8601_basic_short }}"
+  delegate_to: localhost
+  run_once: true
+
+# update systems using yum  and compare running kernel version
+- name: "Upgrade latest packages via yum"
+  yum:
+    name={{ yum_name }}
+    state={{ yum_state }}
+#    disablerepo={{ yum_disablerepo }}
+#    enablerepo={{ yum_enablerepo }}
+#    exclude={{ yum_exclude }}
+  when: ansible_distribution in supported_distros
+  register: yum_result
+
+- block:
+  - name: "Log if yum update failed"
+    lineinfile:
+      line: "HOSTNAME: {{ inventory_hostname }} | yum update failed, PLEASE CHECK THE SERVER"
+      dest: "{{ local_dir }}/update.{{ inventory_hostname }}.yum.{{ timestamp }}"
+      create: yes
+    delegate_to: localhost
+    become: yes
+
+  - name: "Yum failed"
+    debug:
+      msg: "HOSTNAME: {{ inventory_hostname }} | yum update failed, PLEASE CHECK THE SERVER"
+    when: yum_result is defined and yum_result is failed
+
+- block:
+  - name: "Log if nothing to update"
+    lineinfile:
+      line: "HOSTNAME: {{ inventory_hostname }} |  Nothing to update."
+      dest: "{{ local_dir }}/update.{{ inventory_hostname }}.yum.{{ timestamp }}"
+      create: yes
+    delegate_to: localhost
+    become: yes
+
+
+  - name: "nothing to update"
+    debug:
+      msg: "HOSTNAME: {{ inventory_hostname }} |  Nothing to update."
+    when: yum_result is defined and yum_result is succeeded and not yum_result.changed
+
+
+- block:
+  - name: "Log if yum update success"
+    lineinfile:
+      line: "HOSTNAME: {{ inventory_hostname }} | yum update succeeded."
+      dest: "{{ local_dir }}/update.{{ inventory_hostname }}.yum.{{ timestamp }}"
+      create: yes
+    delegate_to: localhost
+    become: yes
+
+  - name: "Update is done "
+    debug:
+      msg: "HOSTNAME: {{ inventory_hostname }} | yum update succeeded."
+    when: yum_result is defined and yum_result is succeeded and yum_result.changed
+
+# check if kernel was updated (last kernel and running kernel)
+#  - name: "Comparing last kernel and running kernel"
+#    shell:  rpm -q --last kernel  | head -1 | awk '{ print $1}' | sed 's/kernel-//g'
+#    args:
+#      warn: false
+#    register: LAST_KERNEL
+#  - debug: var=LAST_KERNEL

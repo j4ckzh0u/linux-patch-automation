@@ -1,0 +1,32 @@
+---
+# tasks file for patch-automation
+# import tasks file to initiate the patching
+- name: Defining patching Type
+  debug:
+    msg: "patching_type: {{ patching_type }}"
+
+#- include_role: ansible-linux-patch-pre-checks
+
+- name: Importing diskspace for /var
+  include_tasks: var-diskusage.yml
+  when: patching_type == "SYSTEM_PATCHING"
+
+- name: Importing disksapace for /
+  include_tasks: root-diskusage.yml
+  when: patching_type == "SYSTEM_PATCHING"
+
+- name: Importing diskspace for /tmp
+  include_tasks: tmp-diskusage.yml
+  when: patching_type == "SYSTEM_PATCHING"
+
+- name: Importing for /boot
+  include_tasks: boot-diskusage.yml
+  when: patching_type == "SYSTEM_PATCHING"
+
+- name: Importing pre patch checks
+  include_tasks: pre-patchcheck.yml
+  when: patching_type == "SYSTEM_PATCHING"
+
+
+
+

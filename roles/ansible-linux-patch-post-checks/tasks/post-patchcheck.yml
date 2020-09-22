@@ -1,0 +1,251 @@
+---
+########################################################################################### 
+##                     Post-Update Check                                                  #
+###########################################################################################
+## check system post_update uptime
+- block:
+  - name: Check the uptime after reboot
+    shell: uptime
+    register: UPTIME_POST_REBOOT
+
+  - debug: msg={{UPTIME_POST_REBOOT.stdout}}
+
+# Supported OS:  RHEL
+  - name: "set patching time"
+    set_fact:
+      timestamp: "{{ ansible_date_time.iso8601_basic_short }}"
+    delegate_to: localhost
+
+# Check if VASTOOL service exist
+  - name: Check if vastool service exists
+    stat: path=/opt/quest/bin/{{ servicename }}
+    register: servicestatus
+
+  - debug:
+      msg: '{{ servicename }}  exists.'
+    when: servicestatus.stat.exists
+  - debug:
+      msg: '{{ servicename }} not found.'
+    when: servicestatus.stat.exists == False
+
+# Check the status of VASTOOL service
+#  - name: Check status of VAS, if it exist already
+#    shell: '/opt/quest/bin/{{ servicename }} status'
+#    register: vastool_status
+#    ignore_errors: yes
+#    changed_when: false
+
+#  - set_fact:
+#      vastool_status: "{{ vastool_status.stdout.split('\n')[4].split(':') }}"
+#    when: servicestatus.stat.exists != False
+
+# Create a report in a delegate server " LOCALHOST " in case vastool service status is OK #
+#  - name: "Creating a report when vastool service status check is OK"
+#    lineinfile:
+#      line: "HOSTNAME: {{ inventory_hostname }} | {{ vastool_status }} : ***No tests failed***"
+#      dest: "{{ local_dir }}/update.{{ inventory_hostname }}.VASTOOL.OK.{{ timestamp }}"
+#      create: yes
+#    delegate_to: localhost
+#    when: "'Result' in vastool_status"
+#    loop: "{{ vastool_status }}"
+
+# Create a failed report in a delegate server " LOCALHOST " in case vastool service status failed #
+#  - name: "send Error msg if vastool service status failed"
+#    lineinfile:
+#      line: "HOSTNAME: {{ inventory_hostname }} | {{ vastool_status }} : ***Test(s) failed***"
+#      dest: "{{ local_dir }}/update.{{ inventory_hostname }}.VASTOOL.FAILED.{{ timestamp }}"
+#      create: yes
+#    delegate_to: localhost
+#    when: "'WARNING' in vastool_status"
+#    loop: "{{ vastool_status }}" 
+  - name: "populate service facts and return service state information"
+    service_facts:
+    register: ansible_facts_services
+    
+  - debug: 
+      msg: "{{ ansible_facts_services }}"  
+    
+
+- name: " Collect a list of the mounted device "
+  set_fact:
+    dvs: "{{ ansible_mounts | map(attribute='device') | list }}"
+
+
+- name: "Register all the system interface "
+  debug:
+    msg: "{{ item }}"
+  loop: "{{ ansible_interfaces }}"
+  when:
+    - hostvars[inventory_hostname]['ansible_%s' | format(item)]['ipv4'] is defined
+    - hostvars[inventory_hostname]['ansible_%s' | format(item)]['active'] == true
+    - hostvars[inventory_hostname]['ansible_%s' | format(item)]['device'] != 'lo'
+  register: NIC_interface
+
+- name: "get the IP address for each interface"
+  debug:
+    msg: "{{ hostvars[inventory_hostname]['ansible_%s' | format(item.item)]['ipv4']['address'] }}"
+  loop: "{{ NIC_interface['results'] }}"
+  when: item.skip_reason is not defined
+  register: NIC_IP
+
+# Validate the FSs are mounted after reboot
+- block:
+  - name: " Check if the FS are mounted "
+    shell:  df -hP | grep "{{ item }}"
+    changed_when: false
+    register: fs_checked
+    loop: "{{ dvs }}"
+
+
+# Create a report in a delegate server " LOCALHOST " in case everything is OK #
+  - name: "Creating a report when all the FSs are mounted successfully"
+    lineinfile:
+      line: "HOSTNAME: {{ inventory_hostname }} | {{ item.stdout }} : MOUNTED "
+      dest: "{{ local_dir }}/update.{{ inventory_hostname }}.OK.{{ timestamp }}"
+      create: yes
+    delegate_to: localhost
+    when: item.rc == 0
+    loop: "{{ fs_checked.results }}"
+
+
+## Create a failed report in a delegate server " LOCALHOST "  in case there  one or more FSs failed to mount after the reboot
+  rescue:
+    - name: "send Error msg if mounting failed"
+      lineinfile:
+        line: "HOSTNAME: {{ inventory_hostname }} | {{ item.item }} : ****NOT MOUNTED***** "
+        dest: "{{ local_dir }}/update.{{ inventory_hostname }}.FAILED.{{ timestamp }}"
+        create: yes
+      delegate_to: localhost
+      when: item.rc != 0
+      loop: "{{ fs_checked.results }}"
+
+
+# Collect the system distribution and version after update
+- name: "Gather facts after update"
+  setup:
+ #   filter: ansible_distribution*
+
+
+# Validate the network interfaces status and IPs
+- block:
+  - name: "Assert that the interface status is active"
+    assert:
+      that: "{{ hostvars[inventory_hostname]['ansible_%s' | format(item.item)]['active'] }} == true "
+    loop: "{{ NIC_interface['results'] }}"
+
+  - name: "Creating a report when the interfaces are active"
+    lineinfile:
+      line: "HOSTNAME: {{ inventory_hostname }} | interface {{ item.item }} : OK "
+      dest: "{{ local_dir }}/update.{{ inventory_hostname }}.OK.{{ timestamp }}"
+      create: yes
+    delegate_to: localhost
+    loop: "{{ NIC_interface['results'] }}"
+  when: item.skip_reason is not defined
+
+  rescue:
+    - name: " Send error msg if one or more interface are not active"
+      lineinfile:
+        line: "HOSTNAME: {{ inventory_hostname }} | interface {{ item.item }} : ****NOT ACTIVE**** "
+        dest: "{{ local_dir }}/update.{{ inventory_hostname }}.FAILED.{{ timestamp }}"
+        create: yes
+      delegate_to: localhost
+
+- block:
+  - name: "Assert that the interface IP address did not change"
+    assert:
+      that:  item.msg in ansible_all_ipv4_addresses
+    loop: "{{ NIC_IP['results'] }}"
+
+  - name: "Creating a report when the interface IP is OK"
+    lineinfile:
+      line: "HOSTNAME: {{ inventory_hostname }} | interface {{ item.item.item }} : {{ item.msg }} : OK  "
+      dest: "{{ local_dir }}/update.{{ inventory_hostname }}.OK.{{ timestamp }}"
+      create: yes
+    delegate_to:  localhost
+    loop: "{{ NIC_IP['results'] }}"
+  when: item.skip_reason is not defined
+
+  rescue:
+    - name: "Send error msg if IP address has changed"
+      lineinfile:
+        line: "HOSTNAME: {{ inventory_hostname }} | interface {{ item.item.item }} :  PLEASE CHECK THE IP ADDRESS"
+        dest: "{{ local_dir }}/update.{{ inventory_hostname }}.FAILED.{{ timestamp }}"
+        create: yes
+      delegate_to: localhost
+
+# Make sure SELinux status does not changed after reboot  
+- name: "check SELinux Status before the patching"
+  set_fact:
+    selinux_status: "{{ ansible_selinux['status'] }}"
+
+- block:
+  - name: " Assert that the SElinux status is OK "
+    assert:
+      that: ansible_selinux['status'] == selinux_status
+
+  - name: "Creating a report when the SELinux is OK"
+    lineinfile:
+      line: "HOSTNAME: {{ inventory_hostname }} | SELinux: OK"
+      dest: "{{ local_dir }}/update.{{ inventory_hostname }}.OK.{{ timestamp }}"
+      create: yes
+    delegate_to: localhost
+
+  rescue:
+    - name: "Send error msg if SELinux status changed"
+      lineinfile:
+        line: "HOSTNAME: {{ inventory_hostname }} | ***SELinux status changed***"
+        dest: "{{ local_dir }}/update.{{ inventory_hostname }}.FAILED.{{ timestamp }}"
+        create: yes
+      delegate_to: localhost
+
+##################################################################################################
+
+- name: set post update os_info
+  set_fact:
+    os_info_post_update:
+      distribution: "{{ ansible_distribution }}"
+      distribution_major_version: "{{ ansible_distribution_major_version }}"
+      distribution_release: "{{ ansible_distribution_release }}"
+      distribution_version: "{{ ansible_distribution_version }}"
+
+- name: "current OS version information before the update"
+  blockinfile:
+    block:  |
+      "HOSTNAME: {{ inventory_hostname }} version after the update:"
+      "      distribution: {{ os_info_post_update.distribution  }} "
+      "      distribution_major_version: {{ os_info_post_update.distribution_major_version }}"
+      "      distribution_release: {{ os_info_post_update.distribution_release }}"
+      "      distribution_version: {{ os_info_post_update.distribution_version }}"
+    dest: "{{ local_dir }}/update.{{ inventory_hostname }}.OK.{{ timestamp }}"
+    create: yes
+  delegate_to: localhost
+
+
+#################################################################################################
+#  Show Summary Report                                                                          #
+################################################################################################# 
+- name: set local directory variable
+  set_fact:
+    local_dir: "/tmp/ansible/sys-patching"
+- name: set final report variable
+  set_fact:
+    final_report: "{{ local_dir }}/update.summary.{{ timestamp }}"
+    
+- name: " Merge all host report files. in {{ local_dir }}/update.summary.{{ timestamp }}"
+  shell: "cat {{ item }} >> {{ local_dir }}/update.summary.{{ timestamp }}"
+  when: item  != final_report
+  loop: "{{ query('fileglob', '{{ local_dir }}/update.{{ inventory_hostname }}*{{ timestamp }}') }}"
+#  loop: "{{ query('fileglob', '{{ local_dir }}/update.*{{ timestamp }}') }}"
+  delegate_to: localhost
+
+- name: " Read the file {{ local_dir }}/update.summary.{{ timestamp }}"
+  shell: "cat  {{ local_dir }}/update.summary.{{ timestamp }}"
+  delegate_to: localhost
+  register: final_report
+
+- name: "show report"
+  debug:
+    msg:
+      - "UPDATE SUMMARY"
+      - "{{ final_report.stdout_lines }}"
+  delegate_to: localhost

@@ -1,0 +1,9 @@
+---
+# handlers file for manage-redhat-satellite-6-registration
+ - name: Enable Katello_Agent
+   service: name=goferd enabled=yes
+
+ - name: Start Katello_Agent
+   service: name=goferd state=started
+
+

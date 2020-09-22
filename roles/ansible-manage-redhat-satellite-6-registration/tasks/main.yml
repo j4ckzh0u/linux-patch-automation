@@ -1,0 +1,35 @@
+---
+    - name: Download and Install a copy of the CA katello-ca-consumer-latest.noarch.rpm from {{ satellite_fqdn }}
+      yum:
+        name: "{{ download_method }}://{{satellite_fqdn }}/pub/katello-ca-consumer-latest.noarch.rpm"
+        state: "{{ ca_state | default('present') }}"
+
+    - name: "Set role_action from desired_role_action"
+      set_fact:
+        role_action: "{{ desired_role_action | default('Register') }}"
+
+    - name: "{{ role_action }} the system to the required organization on the satellite server and add subscription"
+      redhat_subscription:
+        state: "{{ host_state | default('present') }}"
+        activationkey: "{{ A_key }}"
+#       environment: "{{ env }}"
+        org_id: "{{ org }}"
+        force_register: "{{ force_register | default('yes') }}"
+#       autosubscribe: yes
+ 
+    - name: install katello packages
+      yum:
+        name: 
+        - katello-host-tools
+        - katello-host-tools-tracer
+        - katello-agent
+        state: "{{ pkg_state | default('present') }}"
+        update_cache: yes
+
+    - name: Enable Katello Agent
+      service: name=goferd enabled="{{ service_state | default('yes') }}"
+
+    - name: start katello agent
+      service: name=goferd state="{{ katello_state | default('started') }}"
+
+

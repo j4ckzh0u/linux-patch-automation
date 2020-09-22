@@ -1,0 +1,26 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: false
+
+  tasks:
+  # mig cv promote to lfe
+    - name: gather satellite facts
+      include_role:
+         name: gather-redhat-satellite-cv-facts
+
+    - name: "get cv latest version"
+      include_role:
+         name: get-redhat-satellite-cv-version
+
+    - name: "get lifecycle environment id"
+      include_role:
+         name: satellite-lifecycle-environment-gather-facts
+
+    - name: "test"
+      shell:
+         echo Updating lifecycle environent {{ le_id }} with conentview version {{ cv_versionid }}
+
+    - name: "promote to env"
+      include_role:
+         name: satellite-push-contentview-to-lfe

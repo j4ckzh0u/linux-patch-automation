@@ -1,0 +1,26 @@
+---
+#- name: "Add server to in-memory inventory"
+#  hosts: localhost
+#  gather_facts: false
+  
+#  tasks:
+#    - name: "Add server to in-memory inventory group"
+#      add_host:
+#        name: "{{ vm_snapshot_to_delete }}"
+#        groups: patch_all
+        
+- name: delete vm snapshot using ansible-linux-snapshot-automation roles
+  hosts: patch_all
+  remote_user: toweragent
+  become: yes
+  vars_files:
+#    - ./roles/ansible-linux-snapshot-automation/vars/vault.yml
+    - ./roles/ansible-linux-snapshot-automation/vars/vars.yml
+  tasks:
+    - name: Include ansible-linux-snapshot-automation role
+      include_role:
+        name: ansible-linux-snapshot-automation
+      vars:
+        desired_role_action: Delete
+        snapshot_state: absent
+

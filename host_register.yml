@@ -1,0 +1,21 @@
+---
+#- name: "Add server to in-memory inventory"
+#  hosts: localhost
+#  gather_facts: False
+#  tasks:
+#    - name: "Add server to in-memory inventory group"
+#      add_host:
+#        name: "{{ server_to_register }}"
+#        groups: patch_all
+
+- name: "register host systems to satellite server using ansible-manage-redhat-satellite-6-registration roles"
+  hosts: patch_all
+  become: yes
+  remote_user: toweragent
+  gather_facts: True
+  vars_files:
+#    - ./roles/ansible-manage-redhat-satellite-6-registration/vars/vault.yml
+    - ./roles/ansible-manage-redhat-satellite-6-registration/vars/vars.yml
+  roles:
+    - ansible-manage-redhat-satellite-6-registration
+

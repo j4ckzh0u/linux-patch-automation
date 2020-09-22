@@ -1,0 +1,23 @@
+---
+#- name: "Add server to in-memory inventory"
+#  hosts: localhost
+#  gather_facts: false
+  
+#  tasks:
+#    - name: "Add server to in-memory inventory group"
+#      add_host:
+#        name: "{{ server_to_snap }}"
+#        groups: patch_all
+
+- name: taking snapshot of linux systems using ansible-linux-snapshot-automation roles
+  hosts: patch_all
+  remote_user: toweragent
+  become: yes
+  gather_facts: True
+  vars_files:
+#    - ./roles/ansible-linux-snapshot-automation/vars/vault.yml
+    - ./roles/ansible-linux-snapshot-automation/vars/vars.yml
+  roles:
+    - ansible-linux-snapshot-automation
+
+

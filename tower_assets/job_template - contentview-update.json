@@ -1,0 +1,113 @@
+{
+    "allow_simultaneous": true, 
+    "asset_relation": {
+        "extra_credentials": [], 
+        "labels": [], 
+        "notification_templates_error": [], 
+        "notification_templates_success": [], 
+        "roles": [
+            {
+                "name": "Admin", 
+                "team": [
+                    "SADT-Lin"
+                ], 
+                "user": [
+                    "n444646"
+                ]
+            }, 
+            {
+                "name": "Execute", 
+                "team": [], 
+                "user": []
+            }, 
+            {
+                "name": "Read", 
+                "team": [], 
+                "user": []
+            }
+        ], 
+        "schedules": [], 
+        "survey_spec": {
+            "description": "", 
+            "name": "", 
+            "spec": [
+                {
+                    "choices": "", 
+                    "default": "miguel", 
+                    "max": 1024, 
+                    "min": 0, 
+                    "new_question": true, 
+                    "question_description": "Satellite admin user", 
+                    "question_name": "Satellite User", 
+                    "required": true, 
+                    "type": "text", 
+                    "variable": "satellite_user"
+                }, 
+                {
+                    "choices": "", 
+                    "default": "", 
+                    "max": 32, 
+                    "min": 0, 
+                    "new_question": true, 
+                    "question_description": "Sat admin password", 
+                    "question_name": "Satellite password", 
+                    "required": true, 
+                    "type": "password", 
+                    "variable": "satellite_pw"
+                }, 
+                {
+                    "choices": "", 
+                    "default": "xlab2358.aetnat.com", 
+                    "max": 1024, 
+                    "min": 0, 
+                    "new_question": true, 
+                    "question_description": "", 
+                    "question_name": "Satellite Server", 
+                    "required": true, 
+                    "type": "text", 
+                    "variable": "satelliteurl"
+                }, 
+                {
+                    "choices": "", 
+                    "default": "cv23lab", 
+                    "max": 1024, 
+                    "min": 0, 
+                    "question_description": "content view to update", 
+                    "question_name": "Content view name", 
+                    "required": true, 
+                    "type": "text", 
+                    "variable": "cv_name"
+                }, 
+                {
+                    "choices": "", 
+                    "default": "lab_errata1", 
+                    "max": 1024, 
+                    "min": 0, 
+                    "question_description": "name of errata filter rule to update", 
+                    "question_name": "Errata rule name", 
+                    "required": true, 
+                    "type": "text", 
+                    "variable": "errata_rulename"
+                }, 
+                {
+                    "choices": "", 
+                    "default": "2020-03-10", 
+                    "max": 1024, 
+                    "min": 0, 
+                    "question_description": "end date for errata inclusion format: YYYY-MM-DD", 
+                    "question_name": "Errata end date", 
+                    "required": true, 
+                    "type": "text", 
+                    "variable": "err_end_date"
+                }
+            ]
+        }
+    }, 
+    "asset_type": "job_template", 
+    "credential": "IaC/ansible-common/Tower Credentials", 
+    "inventory": "IaC/ansible-common/localhost", 
+    "name": "SrvAutoDevTool/ansible-red-hat-satellite-patch-sandbox/contentview-update", 
+    "playbook": "cv_update.yml", 
+    "project": "SrvAutoDevTool/ansible-red-hat-satellite-patch-sandbox", 
+    "survey_enabled": true
+}

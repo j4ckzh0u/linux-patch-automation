@@ -1,0 +1,28 @@
+---
+   - name: Check available diskspace on /boot partition
+     shell: df  /boot --output\=avail | tail -1
+     register: boot_freespace
+
+   - shell: echo "{{ inventory_hostname }}"
+     register: op
+
+   - debug:
+       msg:
+         - "{{ boot_freespace.stdout }}"
+         - "{{ op.stdout }}"
+
+   - mail:
+       subject: 'DISK USAGE ALERT !!!'
+       from: 'OnyekachiA@aetna.com'
+       body: "/boot  HAS REACHED {{ boot_freespace.stdout }}  ON {{ op.stdout }}, and does not have the minimum space required to continue (0.5Gb requested). KINDLY CHECK !!!"
+       to: 'OnyekachiA@aetna.com'
+       charset: utf8
+     tags: mail
+     when: boot_freespace.stdout|float is lt 5000
+
+   - name: fail when diskspace threshold is reached
+     fail:
+       msg: /boot does not have the minimum space required to continue (0.5Gb requested).
+     when: boot_freespace.stdout|float is lt 5000
+
+

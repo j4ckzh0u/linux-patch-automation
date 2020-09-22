@@ -1,0 +1,71 @@
+---
+    - name: get hostname
+      shell: hostname
+      register: hostname
+
+    - name: output host ID
+      debug: msg="{{ hostname.stdout }}"
+
+    - name: "Look for host entry"
+      uri:
+        url: "https://{{ satellite_fqdn }}/api/v2/hosts/{{ hostname.stdout }}"
+        method: GET
+        validate_certs: no
+        force_basic_auth: yes
+        user: "{{ username }}"
+        password: "{{ password }}"
+        timeout: 900
+      ignore_errors: yes
+      register: output
+
+    - name: output host ID
+      debug: msg="{{ output.json.id }}"
+
+    - name: Delete host subscription in satellite
+      uri:
+        url: "https://{{ satellite_fqdn }}/api/hosts/{{ output.json.id }}/subscriptions"
+        method: DELETE
+        validate_certs: no
+        headers:
+          Content-Type: application/json
+          Accept: application/json,version=2
+        body_format: json
+        body:
+          host_id: "{{ output.json.id }}"
+        force_basic_auth: yes
+        user: "{{ username }}"
+        password: "{{ password }}"
+        status_code: 200
+        timeout: 900
+
+    - name: Disassociate host in satellite
+      uri:
+        url: "https://{{ satellite_fqdn }}/api/v2/hosts/{{ hostname.stdout }}/disassociate"
+        method: PUT
+        validate_certs: no
+        headers:
+          Content-Type: application/json
+          Accept: application/json,version=2
+        body_format: json
+        force_basic_auth: yes
+        user: "{{ username }}"
+        password: "{{ password }}"
+        status_code: 200
+        timeout: 900
+
+    - name: unregister host from satellite
+      command: "subscription-manager unregister"
+
+    - name: clean up host records from satellite
+      command: "subscription-manager clean"
+
+    - name: Delete host in satellite
+      uri:
+        url: "https://{{ satellite_fqdn }}/api/v2/hosts/{{ hostname.stdout }}"
+        method: DELETE
+        validate_certs: no
+        force_basic_auth: yes
+        user: "{{ username }}"
+        password: "{{ password }}"
+        status_code: 200
+        timeout: 900

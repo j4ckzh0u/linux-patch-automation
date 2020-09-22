@@ -1,0 +1,9 @@
+---
+- hosts: localhost
+  gather_facts: no
+  vars:
+  tasks:
+
+    - name: "sync capsule"
+      include_role:
+        name: satellite-capsule-sync

@@ -1,0 +1,35 @@
+{
+    "asset_relation": {
+        "notification_templates_error": [], 
+        "notification_templates_success": [], 
+        "roles": [
+            {
+                "name": "Update", 
+                "team": [], 
+                "user": []
+            }, 
+            {
+                "name": "Use", 
+                "team": [
+                    "SADT-Lin"
+                ], 
+                "user": []
+            }, 
+            {
+                "name": "Read", 
+                "team": [], 
+                "user": []
+            }, 
+            {
+                "name": "Admin", 
+                "team": [], 
+                "user": []
+            }
+        ], 
+        "schedules": []
+    }, 
+    "asset_type": "project", 
+    "local_path": "srvautodevtool_ansible_red_hat_satellite_patch_sandbox", 
+    "name": "SrvAutoDevTool/ansible-red-hat-satellite-patch-sandbox", 
+    "organization": "Aetna"
+}

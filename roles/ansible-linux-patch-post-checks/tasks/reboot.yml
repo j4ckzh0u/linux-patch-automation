@@ -1,0 +1,29 @@
+---
+  - name: "Comparing last kernel and running kernel"
+    shell:  rpm -q --last kernel  | head -1 | awk '{ print $1}' | sed 's/kernel-//g'
+    args:
+      warn: false
+    register: LAST_KERNEL
+  - debug: var=LAST_KERNEL
+
+  - name: get current time before reboot
+    shell: /bin/date +%s
+    register: before_reboot
+
+  - name: "Reboot the system and wait for ssh to become available"
+    reboot:
+      msg:  "Reboot initiated by Ansible after system update"
+      connect_timeout: "{{ server_update_reboot_connect_timeout }}"
+      pre_reboot_delay: "{{ server_update_reboot_pre_reboot_delay }}"
+      post_reboot_delay: "{{ server_update_reboot_post_reboot_delay }}"
+      reboot_timeout: "{{ server_update_reboot_reboot_timeout }}"
+    register: reboot_result
+#  when: reboot_default | bool and reboot_hint_result | bool
+    when: ansible_kernel != LAST_KERNEL.stdout or  ansible_kernel == LAST_KERNEL.stdout
+
+  - name: reboot time
+    debug:
+      msg: "The system rebooted in {{ reboot_result.elapsed }} seconds."
+
+  - name: verify a reboot was actually initiated
+    shell: (( `date +%s` - `awk -F . '{print $1}' /proc/uptime` > {{ before_reboot.stdout }} ))
